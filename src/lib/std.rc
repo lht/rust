@@ -9,6 +9,7 @@
 
 // Built-in types support modules.
 
+mod adler32;
 mod char;
 mod int;
 mod uint;
