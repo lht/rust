@@ -510,9 +510,7 @@ fn link_binary(sess: session::session,
     let prog: str = "gcc";
     // The invocations of gcc share some flags across platforms
 
-    let gcc_args =
-        [stage, "-m32", "-o", saved_out_filename,
-         saved_out_filename + ".o"];
+    let gcc_args = [stage, "-m32", saved_out_filename + ".o"];
     let lib_cmd;
 
     let os = sess.get_targ_cfg().os;
@@ -565,6 +563,15 @@ fn link_binary(sess: session::session,
     if sess.get_opts().library {
         gcc_args += [lib_cmd];
 
+        let library_name = saved_out_filename +
+            alt sess.get_targ_cfg().os {
+               session::os_macos. { ".dylib" }
+               session::os_win32. { ".dll" }
+               _ { ".so" }
+            };
+
+        gcc_args += ["-o", library_name];
+
         // On mac we need to tell the linker to let this library
         // be rpathed
         if sess.get_targ_cfg().os == session::os_macos {
@@ -572,6 +579,8 @@ fn link_binary(sess: session::session,
                         + fs::basename(saved_out_filename)];
         }
     } else {
+        gcc_args += ["-o", saved_out_filename];
+
         // FIXME: why do we hardcode -lm?
         gcc_args += ["-lm"];
     }
