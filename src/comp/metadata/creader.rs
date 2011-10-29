@@ -146,6 +146,10 @@ fn find_library_crate_aux(nn: {prefix: str, suffix: str}, crate_name: str,
     let prefix: str = nn.prefix + crate_name;
     let suffix: str = nn.suffix;
 
+    if crate_name == "std" {
+      prefix = nn.prefix + "ruststd";
+    }
+
     ret filesearch::search(filesearch, { |path|
         let f: str = fs::basename(path);
         if !(str::starts_with(f, prefix) && str::ends_with(f, suffix)) {
