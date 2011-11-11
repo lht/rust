@@ -136,10 +136,8 @@ fn compile_input(sess: session::session, cfg: ast::crate_cfg, input: str,
          bind fn_usage::check_crate_fn_usage(ty_cx, crate));
     time(time_passes, "alt checking",
          bind middle::check_alt::check_crate(ty_cx, crate));
-    if sess.get_opts().run_typestate {
-        time(time_passes, "typestate checking",
-             bind middle::tstate::ck::check_crate(ty_cx, crate));
-    }
+    time(time_passes, "typestate checking",
+         bind middle::tstate::ck::check_crate(ty_cx, crate));
     let mut_map =
         time(time_passes, "mutability checking",
              bind middle::mut::check_crate(ty_cx, crate));
@@ -266,7 +264,6 @@ options:
     --time-llvm-passes time the individual phases of the LLVM backend
     --sysroot <path>   override the system root (default: rustc's directory)
     --target <triple>  target to compile for (default: host triple)
-    --no-typestate     don't run the typestate pass (unsafe!)
     --test             build test harness
     --gc               garbage collect shared data (experimental/temporary)
     --stack-growth     perform stack checks (experimental)
@@ -357,7 +354,6 @@ fn build_session_options(match: getopts::match)
     let stats = opt_present(match, "stats");
     let time_passes = opt_present(match, "time-passes");
     let time_llvm_passes = opt_present(match, "time-llvm-passes");
-    let run_typestate = !opt_present(match, "no-typestate");
     let sysroot_opt = getopts::opt_maybe_str(match, "sysroot");
     let target_opt = getopts::opt_maybe_str(match, "target");
     let opt_level: uint =
@@ -395,7 +391,6 @@ fn build_session_options(match: getopts::match)
           optimize: opt_level,
           debuginfo: debuginfo,
           verify: verify,
-          run_typestate: run_typestate,
           save_temps: save_temps,
           stats: stats,
           time_passes: time_passes,
