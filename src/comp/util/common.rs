@@ -85,6 +85,12 @@ fn is_main_name(path: [ast::ident]) -> bool {
     str::eq(option::get(std::vec::last(path)), "main")
 }
 
+fn version() -> str {
+    let vers = "unknown version";
+    let env_vers = #env["CFG_VERSION"];
+    if str::byte_len(env_vers) != 0u { vers = env_vers; }
+    ret vers;
+}
 
 
 //

@@ -8,7 +8,7 @@ import front::attr;
 import middle::{trans, resolve, freevars, kind, ty, typeck, fn_usage,
                 last_use};
 import syntax::print::{pp, pprust};
-import util::{ppaux, filesearch};
+import util::{ppaux, filesearch, common};
 import back::link;
 import std::{option, str, vec, int, io, getopts, result};
 import std::option::{some, none};
@@ -238,11 +238,8 @@ fn pretty_print_input(sess: session::session, cfg: ast::crate_cfg, input: str,
                         io::string_reader(src), io::stdout(), ann);
 }
 
-fn version(argv0: str) {
-    let vers = "unknown version";
-    let env_vers = #env["CFG_VERSION"];
-    if str::byte_len(env_vers) != 0u { vers = env_vers; }
-    io::stdout().write_str(#fmt["%s %s\n", argv0, vers]);
+fn print_version(argv0: str) {
+    io::stdout().write_str(#fmt["%s %s\n", argv0, common::version()]);
     io::stdout().write_str(#fmt["host: %s\n", host_triple()]);
 }
 
@@ -538,7 +535,7 @@ fn main(args: [str]) {
         ret;
     }
     if opt_present(match, "v") || opt_present(match, "version") {
-        version(binary);
+        print_version(binary);
         ret;
     }
     let ifile = alt vec::len(match.free) {
