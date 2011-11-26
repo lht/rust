@@ -17,6 +17,7 @@
 #include "llvm/PassManager.h"
 #include "llvm/ADT/Triple.h"
 #include "llvm/Assembly/Parser.h"
+#include "llvm/Analysis/DIBuilder.h"
 #include "llvm/Assembly/PrintModulePass.h"
 #include "llvm/Support/FormattedStream.h"
 #include "llvm/Support/Timer.h"
@@ -171,4 +172,34 @@ extern "C" LLVMValueRef LLVMGetOrInsertFunction(LLVMModuleRef M,
                                                 LLVMTypeRef FunctionTy) {
   return wrap(unwrap(M)->getOrInsertFunction(Name,
                                              unwrap<FunctionType>(FunctionTy)));
+}
+
+
+typedef struct LLVMOpaqueDIBuilder *LLVMDIBuilderRef;
+
+#define DEFINE_SIMPLE_CONVERSION_FUNCTIONS(ty, ref)   \
+  inline ty *unwrap(ref P) {                          \
+    return reinterpret_cast<ty*>(P);                  \
+  }                                                   \
+                                                      \
+  inline ref wrap(const ty *P) {                      \
+    return reinterpret_cast<ref>(const_cast<ty*>(P)); \
+  }
+
+DEFINE_SIMPLE_CONVERSION_FUNCTIONS(DIBuilder,             LLVMDIBuilderRef)
+
+extern "C" LLVMDIBuilderRef LLVMCreateDIBuilder(LLVMModuleRef M) {
+  return wrap(new DIBuilder(*unwrap(M)));
+}
+
+extern "C"
+void LLVMDIBuildCompileUnit(LLVMDIBuilderRef DB, unsigned Lang,
+                            const char* Filename,
+                            const char* Directory,
+                            const char* Producer,
+                            bool isOptimized,
+                            const char* Flags,
+                            unsigned RunTimeVer) {
+  unwrap(DB)->createCompileUnit(Lang, Filename, Directory, Producer,
+                                isOptimized, Flags, RunTimeVer);
 }

@@ -10,6 +10,7 @@ import std::option::some;
 import syntax::ast;
 import driver::session;
 import middle::ty;
+import middle::debug_info;
 import back::{link, abi, upcall};
 import util::common::*;
 import syntax::codemap::span;
@@ -113,6 +114,7 @@ type crate_ctxt =
      opaque_vec_type: TypeRef,
      builder: BuilderRef_res,
      shape_cx: shape::ctxt,
+     dbgi: option::t<debug_info::debug_info>,
      gc_cx: gc::ctxt,
      crate_map: ValueRef};
 

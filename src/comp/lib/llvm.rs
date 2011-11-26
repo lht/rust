@@ -893,6 +893,19 @@ native mod llvm {
     /** Links LLVM modules together. `Src` is destroyed by this call and
         must never be referenced again. */
     fn LLVMLinkModules(Dest: ModuleRef, Src: ModuleRef) -> Bool;
+
+    /** ------------------- Debug Info ---------------------- **/
+    type DIBuilderRef;
+    fn LLVMCreateDIBuilder(M: ModuleRef) -> DIBuilderRef;
+
+    fn LLVMDIBuildCompileUnit(db: DIBuilderRef,
+                              lang: uint,
+                              file: sbuf,
+                              dir: sbuf,
+                              producer: sbuf,
+                              isOpt: bool,
+                              flags: sbuf,
+                              rv: uint);
 }
 
 /* Memory-managed object interface to type handles. */

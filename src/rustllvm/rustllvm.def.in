@@ -262,6 +262,7 @@ LLVMCountParams
 LLVMCountStructElementTypes
 LLVMCreateBuilder
 LLVMCreateBuilderInContext
+LLVMCreateDIBuilder
 LLVMCreateExecutionEngine
 LLVMCreateExecutionEngineForModule
 LLVMCreateFunctionPassManager
@@ -282,6 +283,7 @@ LLVMCreateTargetData
 LLVMDeleteBasicBlock
 LLVMDeleteFunction
 LLVMDeleteGlobal
+LLVMDIBuildCompileUnit
 LLVMDisposeBuilder
 LLVMDisposeExecutionEngine
 LLVMDisposeGenericValue

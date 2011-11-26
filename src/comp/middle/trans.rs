@@ -18,6 +18,7 @@ import std::map::{new_int_hash, new_str_hash};
 import std::option::{some, none};
 import driver::session;
 import front::attr;
+import middle::debug_info;
 import middle::{ty, gc};
 import middle::freevars::*;
 import back::{link, abi, upcall};
@@ -6071,6 +6072,7 @@ fn trans_crate(sess: session::session, crate: @ast::crate, tcx: ty::ctxt,
     let sha1s = map::mk_hashmap::<ty::t, str>(hasher, eqer);
     let short_names = map::mk_hashmap::<ty::t, str>(hasher, eqer);
     let crate_map = decl_crate_map(sess, link_meta.name, llmod);
+    let debug_info = debug_info::mk_debug_info(sess, llmod, crate);
     let ccx =
         @{sess: sess,
           llmod: llmod,
@@ -6117,6 +6119,7 @@ fn trans_crate(sess: session::session, crate: @ast::crate, tcx: ty::ctxt,
           opaque_vec_type: T_opaque_vec(targ_cfg),
           builder: BuilderRef_res(llvm::LLVMCreateBuilder()),
           shape_cx: shape::mk_ctxt(llmod),
+          dbgi: debug_info,
           gc_cx: gc::mk_ctxt(),
           crate_map: crate_map};
     let cx = new_local_ctxt(ccx);
