@@ -49,6 +49,7 @@ type options =
 type crate_metadata = {name: str, data: [u8]};
 
 obj session(targ_cfg: @config,
+            args: str,
             opts: @options,
             cstore: metadata::cstore::cstore,
             parse_sess: parse_sess,
@@ -69,6 +70,7 @@ obj session(targ_cfg: @config,
         codemap::emit_error(none, msg, parse_sess.cm);
         fail;
     }
+    fn get_args() -> str { ret args; }
     fn span_err(sp: span, msg: str) {
         codemap::emit_error(some(sp), msg, parse_sess.cm);
         err_count += 1u;

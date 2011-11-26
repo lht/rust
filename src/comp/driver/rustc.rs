@@ -431,14 +431,14 @@ fn build_session_options(match: getopts::match)
     ret sopts;
 }
 
-fn build_session(sopts: @session::options) -> session::session {
+fn build_session(args: [str], sopts: @session::options) -> session::session {
     let target_cfg = build_target_config(sopts);
     let cstore = cstore::mk_cstore();
     let filesearch = filesearch::mk_filesearch(
         sopts.maybe_sysroot,
         sopts.target_triple,
         sopts.addl_lib_search_paths);
-    ret session::session(target_cfg, sopts, cstore,
+    ret session::session(target_cfg, str::connect(args, " "), sopts, cstore,
                          @{cm: codemap::new_codemap(), mutable next_id: 0},
                          none, 0u, filesearch);
 }
@@ -548,7 +548,7 @@ fn main(args: [str]) {
     };
 
     let sopts = build_session_options(match);
-    let sess = build_session(sopts);
+    let sess = build_session(args, sopts);
     let ofile = getopts::opt_maybe_str(match, "o");
     let outputs = build_output_filenames(ifile, ofile, sopts);
     let cfg = build_configuration(sess, binary, ifile);
@@ -586,12 +586,13 @@ mod test {
     // When the user supplies --test we should implicitly supply --cfg test
     #[test]
     fn test_switch_implies_cfg_test() {
+        let args = ["--test"];
         let match =
-            alt getopts::getopts(["--test"], opts()) {
+            alt getopts::getopts(args, opts()) {
               getopts::success(m) { m }
             };
         let sessopts = build_session_options(match);
-        let sess = build_session(sessopts);
+        let sess = build_session(args, sessopts);
         let cfg = build_configuration(sess, "whatever", "whatever");
         assert (attr::contains_name(cfg, "test"));
     }
@@ -600,12 +601,13 @@ mod test {
     // another --cfg test
     #[test]
     fn test_switch_implies_cfg_test_unless_cfg_test() {
+        let args = ["--test", "--cfg=test"];
         let match =
-            alt getopts::getopts(["--test", "--cfg=test"], opts()) {
+            alt getopts::getopts(args, opts()) {
               getopts::success(m) { m }
             };
         let sessopts = build_session_options(match);
-        let sess = build_session(sessopts);
+        let sess = build_session(args, sessopts);
         let cfg = build_configuration(sess, "whatever", "whatever");
         let test_items = attr::find_meta_items_by_name(cfg, "test");
         assert (vec::len(test_items) == 1u);
