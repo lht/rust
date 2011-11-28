@@ -5001,6 +5001,14 @@ fn trans_closure(cx: @local_ctxt, sp: span, f: ast::_fn, llfndecl: ValueRef,
 
     // Set up arguments to the function.
     let fcx = new_fn_ctxt_w_id(cx, sp, llfndecl, id, f.decl.cf);
+
+    alt cx.ccx.dbgi {
+      option::some(dbgi) {
+        debug_info::emit_fn_start(dbgi, fcx);
+      }
+      _ { }
+    }
+
     create_llargs_for_fn_args(fcx, ty_self, f.decl.inputs, ty_params);
     alt fcx.llself {
       some(llself) { populate_fn_ctxt_from_llself(fcx, llself); }
@@ -6071,8 +6079,8 @@ fn trans_crate(sess: session::session, crate: @ast::crate, tcx: ty::ctxt,
     let lltypes = map::mk_hashmap::<ty::t, TypeRef>(hasher, eqer);
     let sha1s = map::mk_hashmap::<ty::t, str>(hasher, eqer);
     let short_names = map::mk_hashmap::<ty::t, str>(hasher, eqer);
-    let crate_map = decl_crate_map(sess, link_meta.name, llmod);
     let debug_info = debug_info::mk_debug_info(sess, llmod, crate);
+    let crate_map = decl_crate_map(sess, link_meta.name, llmod);
     let ccx =
         @{sess: sess,
           llmod: llmod,

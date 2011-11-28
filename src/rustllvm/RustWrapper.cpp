@@ -18,6 +18,7 @@
 #include "llvm/ADT/Triple.h"
 #include "llvm/Assembly/Parser.h"
 #include "llvm/Analysis/DIBuilder.h"
+#include "llvm/Analysis/DebugInfo.h"
 #include "llvm/Assembly/PrintModulePass.h"
 #include "llvm/Support/FormattedStream.h"
 #include "llvm/Support/Timer.h"
@@ -28,6 +29,7 @@
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Target/TargetOptions.h"
 #include "llvm/Support/Host.h"
+#include "llvm/Metadata.h"
 #include "llvm-c/Core.h"
 #include "llvm-c/BitReader.h"
 #include "llvm-c/Object.h"
@@ -176,6 +178,12 @@ extern "C" LLVMValueRef LLVMGetOrInsertFunction(LLVMModuleRef M,
 
 
 typedef struct LLVMOpaqueDIBuilder *LLVMDIBuilderRef;
+typedef struct LLVMMDNode *LLVMMDNodeRef;
+typedef struct LLVMDIDescriptor *LLVMDIDescriptorRef;
+typedef struct LLVMDIFile *LLVMDIFileRef;
+typedef struct LLVMDISubprogram *LLVMDISubprogramRef;
+typedef struct LLVMDIType *LLVMDITypeRef;
+typedef struct LLVMDIArray *LLVMDIArrayRef;
 
 #define DEFINE_SIMPLE_CONVERSION_FUNCTIONS(ty, ref)   \
   inline ty *unwrap(ref P) {                          \
@@ -186,7 +194,16 @@ typedef struct LLVMOpaqueDIBuilder *LLVMDIBuilderRef;
     return reinterpret_cast<ref>(const_cast<ty*>(P)); \
   }
 
-DEFINE_SIMPLE_CONVERSION_FUNCTIONS(DIBuilder,             LLVMDIBuilderRef)
+
+DEFINE_SIMPLE_CONVERSION_FUNCTIONS(MDNode,           LLVMMDNodeRef)
+DEFINE_SIMPLE_CONVERSION_FUNCTIONS(DIBuilder,        LLVMDIBuilderRef)
+DEFINE_SIMPLE_CONVERSION_FUNCTIONS(DIDescriptor,     LLVMDIDescriptorRef)
+DEFINE_SIMPLE_CONVERSION_FUNCTIONS(DISubprogram,     LLVMDISubprogramRef)
+DEFINE_SIMPLE_CONVERSION_FUNCTIONS(DIType,           LLVMDITypeRef)
+DEFINE_SIMPLE_CONVERSION_FUNCTIONS(DIFile,           LLVMDIFileRef)
+DEFINE_SIMPLE_CONVERSION_FUNCTIONS(DIArray,          LLVMDIArrayRef)
+
+#undef DEFINE_SIMPLE_CONVERSION_FUNCTIONS
 
 extern "C" LLVMDIBuilderRef LLVMCreateDIBuilder(LLVMModuleRef M) {
   return wrap(new DIBuilder(*unwrap(M)));
@@ -203,3 +220,52 @@ void LLVMDIBuildCompileUnit(LLVMDIBuilderRef DB, unsigned Lang,
   unwrap(DB)->createCompileUnit(Lang, Filename, Directory, Producer,
                                 isOptimized, Flags, RunTimeVer);
 }
+
+extern "C" LLVMDIFileRef
+LLVMDIBuildFile(LLVMDIBuilderRef DB,
+                const char* Filename,
+                const char* Directory) {
+  DIFile f = unwrap(DB)->createFile(Filename, Directory);
+  return wrap(&f);
+}
+
+extern "C" LLVMDISubprogramRef
+LLVMDIBuildFunction(LLVMDIBuilderRef DB, LLVMDIDescriptorRef Scope,
+                    const char* Name, const char* LinkageName,
+                    LLVMDIFileRef File, unsigned LineNo,
+                    LLVMDITypeRef Ty, bool isLocalToUnit,
+                    bool isDefinition, unsigned Flags,
+                    bool isOptimized, LLVMValueRef Fn,
+                    LLVMMDNodeRef TParam, LLVMMDNodeRef Decl) {
+   DISubprogram sp =
+       unwrap(DB)->createFunction(*unwrap(Scope), Name,
+                                  LinkageName,
+                                  *unwrap(File), LineNo,
+                                  *unwrap(Ty), isLocalToUnit,
+                                  isDefinition,
+                                  Flags,
+                                  isOptimized,
+                                  unwrap<Function>(Fn),
+                                  unwrap(TParam),
+                                  unwrap(Decl));
+   return wrap(&sp);
+}
+
+extern "C" LLVMDITypeRef
+LLVMDIBuildBasicType(LLVMDIBuilderRef DB,
+                     const char* Name, uint64_t SizeInBits,
+                     uint64_t AlignInBits, unsigned Encoding) {
+  DIType t = unwrap(DB)->createBasicType(Name, SizeInBits,
+                                         AlignInBits, Encoding);
+  return wrap(&t);
+}
+
+extern "C" LLVMDITypeRef
+LLVMDIBuildSubroutineType(LLVMDIBuilderRef DB,
+                          LLVMDIFileRef File,
+                          LLVMDIArrayRef ParameterTypes) {
+  DIType st = unwrap(DB)->createSubroutineType(*unwrap(File),
+                                               *unwrap(ParameterTypes));
+  return wrap(&st);
+}
+

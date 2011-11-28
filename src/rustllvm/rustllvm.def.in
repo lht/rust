@@ -283,7 +283,11 @@ LLVMCreateTargetData
 LLVMDeleteBasicBlock
 LLVMDeleteFunction
 LLVMDeleteGlobal
+LLVMDIBuildBasicType
 LLVMDIBuildCompileUnit
+LLVMDIBuildFile
+LLVMDIBuildFunction
+LLVMDIBuildSubroutineType
 LLVMDisposeBuilder
 LLVMDisposeExecutionEngine
 LLVMDisposeGenericValue

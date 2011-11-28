@@ -895,7 +895,12 @@ native mod llvm {
     fn LLVMLinkModules(Dest: ModuleRef, Src: ModuleRef) -> Bool;
 
     /** ------------------- Debug Info ---------------------- **/
+    type MDNodeRef;
     type DIBuilderRef;
+    type DIFileRef;
+    type DITypeRef;
+    type DIArrayRef;
+    type DIDescriptorRef;
     fn LLVMCreateDIBuilder(M: ModuleRef) -> DIBuilderRef;
 
     fn LLVMDIBuildCompileUnit(db: DIBuilderRef,
@@ -906,6 +911,32 @@ native mod llvm {
                               isOpt: bool,
                               flags: sbuf,
                               rv: uint);
+    fn LLVMDIBuildFunction(db: DIBuilderRef,
+                           scope: DIDescriptorRef,
+                           name: sbuf,
+                           linkage_name: sbuf,
+                           file: DIFileRef,
+                           line_no: uint,
+                           ty: DITypeRef,
+                           isLocalToUnit: bool,
+                           isDefinition: bool,
+                           flags: uint,
+                           isOptimized: bool,
+                           Fn: ValueRef,
+                           param: MDNodeRef,
+                           decl: MDNodeRef) -> MDNodeRef;
+    fn LLVMDIBuildFile(db: DIBuilderRef,
+                       filename: sbuf,
+                       dir: sbuf) -> DIFileRef;
+    fn LLVMDIBuildSubroutineType(db: DIBuilderRef,
+                                 file: DIFileRef,
+                                 params: DIArrayRef) -> DITypeRef;
+    fn LLVMDIBuildBasicType(db: DIBuilderRef,
+                            name: sbuf,
+                            sz_in_bits: u64,
+                            align_in_bits: u64,
+                            encoding: uint) -> DITypeRef;
+
 }
 
 /* Memory-managed object interface to type handles. */
