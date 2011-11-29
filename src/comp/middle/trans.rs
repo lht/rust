@@ -5001,14 +5001,6 @@ fn trans_closure(cx: @local_ctxt, sp: span, f: ast::_fn, llfndecl: ValueRef,
 
     // Set up arguments to the function.
     let fcx = new_fn_ctxt_w_id(cx, sp, llfndecl, id, f.decl.cf);
-
-    alt cx.ccx.dbgi {
-      option::some(dbgi) {
-        debug_info::emit_fn_start(dbgi, fcx);
-      }
-      _ { }
-    }
-
     create_llargs_for_fn_args(fcx, ty_self, f.decl.inputs, ty_params);
     alt fcx.llself {
       some(llself) { populate_fn_ctxt_from_llself(fcx, llself); }
@@ -5553,6 +5545,16 @@ fn register_fn_full(ccx: @crate_ctxt, sp: span, path: [str], _flav: str,
     let llfn: ValueRef = decl_cdecl_fn(ccx.llmod, ps, llfty);
     ccx.item_ids.insert(node_id, llfn);
     ccx.item_symbols.insert(node_id, ps);
+
+    alt ccx.dbgi {
+      option::some(dbgi) {
+        dbgi.emit_fn_start(ps, str::connect(path, "::"),
+                           ccx.sess.get_opts().optimize != 0u,
+                           llfty, llfn);
+      }
+      _ { }
+    }
+
 
     let is_main: bool = is_main_name(path) && !ccx.sess.get_opts().library;
     if is_main { create_main_wrapper(ccx, sp, llfn, node_type); }
