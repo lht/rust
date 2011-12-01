@@ -275,15 +275,14 @@ fn emit_fn_start(dcx: @dbg_ctxt, link_name: str, name: str,
                  //, ty_params: [ast::ty_param] //FIXME
                 ) {
     let file = get_file(dcx, loc);
-    let difn =
-        llvm::LLVMDIBuildFunction(*dcx.builder, dcx.cu,
-                                  as_buf(link_name), as_buf(name),
-                                  file, loc.line, dummy_fn_ty(),
-                                  local,
-                                  true, // always defined
-                                  flags, dcx.is_opt, llfn,
-                                  dummy_ty_params(),
-                                  nil_mdnode());
+    llvm::LLVMDIBuildFunction(*dcx.builder, dcx.cu,
+                              as_buf(name), as_buf(link_name),
+                              file, loc.line, dummy_fn_ty(),
+                              local,
+                              true, // always defined
+                              flags, dcx.is_opt, llfn,
+                              dummy_ty_params(),
+                              nil_mdnode());
 }
 
 fn finalize(dcx: @dbg_ctxt) {
