@@ -209,6 +209,18 @@ extern "C" LLVMDIBuilderRef LLVMCreateDIBuilder(LLVMModuleRef M) {
   return wrap(new DIBuilder(*unwrap(M)));
 }
 
+extern "C" void LLVMDisposeDIBuilder(LLVMDIBuilderRef B) {
+  delete unwrap(B);
+}
+
+extern "C" void LLVMFinalizeDIBuilder(LLVMDIBuilderRef B) {
+  unwrap(B)->finalize();
+}
+
+extern "C" LLVMMDNodeRef LLVMDIGetCU(LLVMDIBuilderRef B) {
+  return wrap(unwrap(B)->getCU());
+}
+
 extern "C"
 void LLVMDIBuildCompileUnit(LLVMDIBuilderRef DB, unsigned Lang,
                             const char* Filename,
@@ -230,25 +242,28 @@ LLVMDIBuildFile(LLVMDIBuilderRef DB,
 }
 
 extern "C" LLVMDISubprogramRef
-LLVMDIBuildFunction(LLVMDIBuilderRef DB, LLVMDIDescriptorRef Scope,
+LLVMDIBuildFunction(LLVMDIBuilderRef DB, LLVMMDNodeRef Scope,
                     const char* Name, const char* LinkageName,
                     LLVMDIFileRef File, unsigned LineNo,
                     LLVMDITypeRef Ty, bool isLocalToUnit,
                     bool isDefinition, unsigned Flags,
                     bool isOptimized, LLVMValueRef Fn,
                     LLVMMDNodeRef TParam, LLVMMDNodeRef Decl) {
-   DISubprogram sp =
-       unwrap(DB)->createFunction(*unwrap(Scope), Name,
-                                  LinkageName,
-                                  *unwrap(File), LineNo,
-                                  *unwrap(Ty), isLocalToUnit,
-                                  isDefinition,
-                                  Flags,
-                                  isOptimized,
-                                  unwrap<Function>(Fn),
-                                  unwrap(TParam),
-                                  unwrap(Decl));
-   return wrap(&sp);
+  DIDescriptor d(unwrap(Scope));
+  DISubprogram sp =
+      unwrap(DB)->createFunction(d, Name,
+                                 LinkageName,
+                                 *unwrap(File), LineNo,
+                                 *unwrap(Ty), isLocalToUnit,
+                                 isDefinition,
+                                 Flags,
+                                 isOptimized,
+                                 unwrap<Function>(Fn));
+  /* FIXME
+     unwrap(TParam),
+     unwrap(Decl));
+  */
+  return wrap(&sp);
 }
 
 extern "C" LLVMDITypeRef
@@ -269,3 +284,35 @@ LLVMDIBuildSubroutineType(LLVMDIBuilderRef DB,
   return wrap(&st);
 }
 
+extern "C" LLVMDITypeRef
+LLVMDIBuildMemberType(LLVMDIBuilderRef DB, LLVMDIDescriptorRef Scope,
+                      const char* Name, LLVMDIFileRef File,
+                      unsigned LineNo, uint64_t SizeInBits,
+                      uint64_t AlignInBits, uint64_t OffsetInBits,
+                      unsigned Flags, LLVMDITypeRef Ty) {
+  DIType st = unwrap(DB)->createMemberType(*unwrap(Scope), Name, *unwrap(File),
+                                           LineNo, SizeInBits, AlignInBits,
+                                           OffsetInBits, Flags, *unwrap(Ty));
+  return wrap(&st);
+}
+
+extern "C" LLVMDITypeRef
+LLVMDIBuildStructType(LLVMDIBuilderRef DB, LLVMDIDescriptorRef Scope,
+                      const char* Name, LLVMDIFileRef File,
+                      unsigned LineNo, uint64_t SizeInBits,
+                      uint64_t AlignInBits, unsigned Flags,
+                      LLVMDIArrayRef Elements, unsigned RunTimeLang = 0) {
+  DIType st = unwrap(DB)->createStructType(*unwrap(Scope), Name, *unwrap(File),
+                                           LineNo, SizeInBits, AlignInBits,
+                                           Flags, *unwrap(Elements),
+                                           RunTimeLang);
+  return wrap(&st);
+}
+
+extern "C" LLVMDIArrayRef
+LLVMDIGetOrCreateArray(LLVMDIBuilderRef DB, LLVMValueRef *Indices,
+                       unsigned NumIndices) {
+  DIArray dt = unwrap(DB)->getOrCreateArray(
+      makeArrayRef(unwrap<Value>(Indices, NumIndices), NumIndices));
+  return wrap(&dt);
+}

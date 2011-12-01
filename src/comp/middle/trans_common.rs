@@ -114,7 +114,7 @@ type crate_ctxt =
      opaque_vec_type: TypeRef,
      builder: BuilderRef_res,
      shape_cx: shape::ctxt,
-     dbgi: option::t<debug_info::debug_info>,
+     dcx: option::t<@debug_info::dbg_ctxt>,
      gc_cx: gc::ctxt,
      crate_map: ValueRef};
 

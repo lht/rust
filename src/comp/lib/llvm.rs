@@ -902,6 +902,9 @@ native mod llvm {
     type DIArrayRef;
     type DIDescriptorRef;
     fn LLVMCreateDIBuilder(M: ModuleRef) -> DIBuilderRef;
+    fn LLVMDisposeDIBuilder(B: DIBuilderRef);
+    fn LLVMFinalizeDIBuilder(B: DIBuilderRef);
+    fn LLVMDIGetCU(B: DIBuilderRef) -> MDNodeRef;
 
     fn LLVMDIBuildCompileUnit(db: DIBuilderRef,
                               lang: uint,
@@ -912,7 +915,7 @@ native mod llvm {
                               flags: sbuf,
                               rv: uint);
     fn LLVMDIBuildFunction(db: DIBuilderRef,
-                           scope: DIDescriptorRef,
+                           scope: MDNodeRef,
                            name: sbuf,
                            linkage_name: sbuf,
                            file: DIFileRef,
@@ -936,7 +939,20 @@ native mod llvm {
                             sz_in_bits: u64,
                             align_in_bits: u64,
                             encoding: uint) -> DITypeRef;
-
+    fn LLVMDIBuildStructType(db: DIBuilderRef, scope: DIDescriptorRef,
+                             name: sbuf, file: DIFileRef,
+                             line: uint, sz: u64,
+                             asz: u64, flags: uint,
+                             els: DIArrayRef,
+                             rtl: uint) -> DITypeRef;
+    fn LLVMDIBuildMemberType(db: DIBuilderRef,
+                             scope: DIDescriptorRef, name: sbuf,
+                             file: DIFileRef,
+                             LineNo: uint, SizeInBits: u64,
+                             AlignInBits: u64, OffsetInBits: u64,
+                             Flags: uint, ty: DITypeRef) -> DITypeRef;
+    fn LLVMDIGetOrCreateArray(db: DIBuilderRef, idx: *ValueRef, nidx: uint)
+        -> DIArrayRef;
 }
 
 /* Memory-managed object interface to type handles. */

@@ -24,7 +24,7 @@ import middle::freevars::*;
 import back::{link, abi, upcall};
 import syntax::{ast, ast_util};
 import syntax::visit;
-import syntax::codemap::span;
+import syntax::codemap::{lookup_char_pos, span};
 import syntax::print::pprust::{expr_to_str, stmt_to_str};
 import visit::vt;
 import util::common::*;
@@ -5546,15 +5546,14 @@ fn register_fn_full(ccx: @crate_ctxt, sp: span, path: [str], _flav: str,
     ccx.item_ids.insert(node_id, llfn);
     ccx.item_symbols.insert(node_id, ps);
 
-    alt ccx.dbgi {
-      option::some(dbgi) {
-        dbgi.emit_fn_start(ps, str::connect(path, "::"),
-                           ccx.sess.get_opts().optimize != 0u,
-                           llfty, llfn);
+    alt ccx.dcx {
+      option::some(d) {
+        let loc = lookup_char_pos(ccx.sess.get_codemap(), sp.lo);
+        debug_info::emit_fn_start(d, ps, str::connect(path, "::"),
+                                  loc, true, 0u, llfn);
       }
       _ { }
     }
-
 
     let is_main: bool = is_main_name(path) && !ccx.sess.get_opts().library;
     if is_main { create_main_wrapper(ccx, sp, llfn, node_type); }
@@ -6081,7 +6080,7 @@ fn trans_crate(sess: session::session, crate: @ast::crate, tcx: ty::ctxt,
     let lltypes = map::mk_hashmap::<ty::t, TypeRef>(hasher, eqer);
     let sha1s = map::mk_hashmap::<ty::t, str>(hasher, eqer);
     let short_names = map::mk_hashmap::<ty::t, str>(hasher, eqer);
-    let debug_info = debug_info::mk_debug_info(sess, llmod, crate);
+    let dbg_ctxt = debug_info::mk_dbg_ctxt(tcx, llmod, crate);
     let crate_map = decl_crate_map(sess, link_meta.name, llmod);
     let ccx =
         @{sess: sess,
@@ -6129,7 +6128,7 @@ fn trans_crate(sess: session::session, crate: @ast::crate, tcx: ty::ctxt,
           opaque_vec_type: T_opaque_vec(targ_cfg),
           builder: BuilderRef_res(llvm::LLVMCreateBuilder()),
           shape_cx: shape::mk_ctxt(llmod),
-          dbgi: debug_info,
+          dcx: dbg_ctxt,
           gc_cx: gc::mk_ctxt(),
           crate_map: crate_map};
     let cx = new_local_ctxt(ccx);
@@ -6141,6 +6140,10 @@ fn trans_crate(sess: session::session, crate: @ast::crate, tcx: ty::ctxt,
     emit_tydescs(ccx);
     shape::gen_shape_tables(ccx);
     write_abi_version(ccx);
+    alt ccx.dcx {
+      some(d) { debug_info::finalize(d); }
+      none. { }
+    }
 
     // Translate the metadata.
     write_metadata(cx.ccx, crate);
