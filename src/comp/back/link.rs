@@ -548,8 +548,24 @@ fn mangle_internal_name_by_seq(ccx: @crate_ctxt, flav: str) -> str {
 // If the user wants an exe generated we need to invoke
 // gcc to link the object file with some libs
 fn link_binary(sess: session::session,
+               library: bool,
+               ofile: option::t<str>,
                obj_filename: str,
-               out_filename: str) {
+               link_meta: option::t<link_meta>) {
+
+    let (basename, _) = fs::splitext(fs::basename(obj_filename));
+    let out_filename = if library {
+        alt ofile {
+          none. { std::os::dylib_filename(basename) }
+          some(ofile_) { ofile_ }
+        }
+    } else {
+        alt ofile {
+          none. { basename }
+          some(ofile_) { ofile_ }
+        }
+    };
+
     // The default library location, we need this to find the runtime.
     // The location of crates will be determined as needed.
     let stage: str = "-L" + sess.filesearch().get_target_lib_path();
@@ -649,12 +665,25 @@ fn link_binary(sess: session::session,
         sess.note(prog.err + prog.out);
         sess.abort_if_errors();
     }
-    // Clean up on Darwin
 
+    if (library) {
+        alt link_meta {
+          none. { fail "invalid link_meta"; }
+          some(lm) {
+            let libname =
+                fs::connect(
+                    fs::dirname(out_filename),
+                    std::os::dylib_filename(
+                        #fmt("%s-%s-%s", lm.name, lm.extras_hash, lm.vers)));
+            run::run_program("cp", [out_filename, libname]);
+          }
+        }
+    }
+
+    // Clean up on Darwin
     if sess.get_targ_cfg().os == session::os_macos {
         run::run_program("dsymutil", [out_filename]);
     }
-
 
     // Remove the temporary object file if we aren't saving temps
     if !sess.get_opts().save_temps {

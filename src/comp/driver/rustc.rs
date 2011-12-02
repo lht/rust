@@ -10,7 +10,7 @@ import middle::{trans, resolve, freevars, kind, ty, typeck, fn_usage,
 import syntax::print::{pp, pprust};
 import util::{ppaux, filesearch};
 import back::link;
-import std::{option, str, vec, int, io, getopts, result};
+import std::{fs, option, str, vec, int, io, getopts, result};
 import std::option::{some, none};
 import std::getopts::{optopt, optmulti, optflag, optflagopt, opt_present};
 import back::{x86, x86_64};
@@ -109,11 +109,11 @@ fn time<T>(do_it: bool, what: str, thunk: fn@() -> T) -> T {
 }
 
 fn compile_input(sess: session::session, cfg: ast::crate_cfg, input: str,
-                 output: str) {
+                 output: str) -> option::t<link::link_meta> {
     let time_passes = sess.get_opts().time_passes;
     let crate =
         time(time_passes, "parsing", bind parse_input(sess, cfg, input));
-    if sess.get_opts().parse_only { ret; }
+    if sess.get_opts().parse_only { ret option::none; }
     crate =
         time(time_passes, "configuration",
              bind front::config::strip_unconfigured_items(crate));
@@ -159,13 +159,14 @@ fn compile_input(sess: session::session, cfg: ast::crate_cfg, input: str,
         bind last_use::find_last_uses(crate, def_map, ref_map, ty_cx));
     time(time_passes, "kind checking",
          bind kind::check_crate(ty_cx, last_uses, crate));
-    if sess.get_opts().no_trans { ret; }
-    let llmod =
+    if sess.get_opts().no_trans { ret option::none; }
+    let (llmod, link_meta) =
         time(time_passes, "translation",
              bind trans::trans_crate(sess, crate, ty_cx, output, ast_map,
                                      mut_map, copy_map, last_uses));
     time(time_passes, "LLVM passes",
          bind link::write::run_passes(sess, llmod, output));
+    ret option::some(link_meta);
 }
 
 fn pretty_print_input(sess: session::session, cfg: ast::crate_cfg, input: str,
@@ -471,11 +472,9 @@ fn opts() -> [getopts::opt] {
          optflag("warn-unused-imports")];
 }
 
-fn build_output_filenames(ifile: str, ofile: option::t<str>,
-                          sopts: @session::options)
-        -> @{out_filename: str, obj_filename:str} {
+fn build_output_filename(ifile: str, ofile: option::t<str>,
+                          sopts: @session::options) -> str {
     let obj_filename = "";
-    let saved_out_filename: str = "";
     let stop_after_codegen =
         sopts.output_type != link::output_type_exe ||
             sopts.static && sopts.library;
@@ -502,21 +501,13 @@ fn build_output_filenames(ifile: str, ofile: option::t<str>,
               }
             };
         obj_filename = base_filename + "." + suffix;
-
-        if sopts.library {
-            saved_out_filename = std::os::dylib_filename(base_filename);
-        } else {
-            saved_out_filename = base_filename;
-        }
       }
       some(out_file) {
-        // FIXME: what about windows? This will create a foo.exe.o.
-        saved_out_filename = out_file;
         obj_filename =
             if stop_after_codegen { out_file } else { out_file + ".o" };
       }
     }
-    ret @{out_filename: saved_out_filename, obj_filename: obj_filename};
+    ret obj_filename;
 }
 
 fn early_error(msg: str) -> ! {
@@ -550,7 +541,7 @@ fn main(args: [str]) {
     let sopts = build_session_options(match);
     let sess = build_session(sopts);
     let ofile = getopts::opt_maybe_str(match, "o");
-    let outputs = build_output_filenames(ifile, ofile, sopts);
+    let output = build_output_filename(ifile, ofile, sopts);
     let cfg = build_configuration(sess, binary, ifile);
     let pretty =
         option::map::<str,
@@ -571,13 +562,11 @@ fn main(args: [str]) {
         sopts.output_type != link::output_type_exe ||
             sopts.static && sopts.library;
 
-    let temp_filename = outputs.obj_filename;
-
-    compile_input(sess, cfg, ifile, temp_filename);
+    let link_meta = compile_input(sess, cfg, ifile, output);
 
     if stop_after_codegen { ret; }
 
-    link::link_binary(sess, temp_filename, outputs.out_filename);
+    link::link_binary(sess, sopts.library, ofile, output, link_meta);
 }
 
 #[cfg(test)]
