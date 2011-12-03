@@ -566,7 +566,11 @@ fn main(args: [str]) {
 
     if stop_after_codegen { ret; }
 
-    link::link_binary(sess, sopts.library, ofile, output, link_meta);
+    let bin_name =
+        link::link_binary(sess, sopts.library, ofile, output);
+    if sopts.library {
+        link::rename_library(bin_name, option::get(link_meta));
+    }
 }
 
 #[cfg(test)]
