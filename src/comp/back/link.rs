@@ -548,8 +548,23 @@ fn mangle_internal_name_by_seq(ccx: @crate_ctxt, flav: str) -> str {
 // If the user wants an exe generated we need to invoke
 // gcc to link the object file with some libs
 fn link_binary(sess: session::session,
-               obj_filename: str,
-               out_filename: str) {
+               library: bool,
+               ofile: option::t<str>,
+               obj_filename: str) -> str {
+
+    let (basename, _) = fs::splitext(fs::basename(obj_filename));
+    let out_filename = if library {
+        alt ofile {
+          none. { std::os::dylib_filename(basename) }
+          some(ofile_) { ofile_ }
+        }
+    } else {
+        alt ofile {
+          none. { basename }
+          some(ofile_) { ofile_ }
+        }
+    };
+
     // The default library location, we need this to find the runtime.
     // The location of crates will be determined as needed.
     let stage: str = "-L" + sess.filesearch().get_target_lib_path();
@@ -661,12 +676,12 @@ fn link_binary(sess: session::session,
     }
 }
 
-fn rename_library(output: str, lm: link_meta) {
+fn rename_library(out: str, lm: link_meta) {
     let libname =
         std::os::dylib_filename(#fmt("%s-%s-%s",
                                      lm.name, lm.extras_hash, lm.vers));
-    let fullname = fs::connect(fs::dirname(output), libname);
-    run::run_program("cp", [output, fullname]);
+    let fullname = fs::connect(fs::dirname(out_filename), libname);
+    run::run_program("cp", [out, fullname]);
 }
 //
 // Local Variables:
