@@ -550,7 +550,8 @@ fn mangle_internal_name_by_seq(ccx: @crate_ctxt, flav: str) -> str {
 fn link_binary(sess: session::session,
                library: bool,
                ofile: option::t<str>,
-               obj_filename: str) -> str {
+               obj_filename: str,
+               link_meta: option::t<link_meta>) {
 
     let (basename, _) = fs::splitext(fs::basename(obj_filename));
     let out_filename = if library {
@@ -665,6 +666,20 @@ fn link_binary(sess: session::session,
         sess.abort_if_errors();
     }
 
+    if (library) {
+        alt link_meta {
+          none. { fail "invalid link_meta"; }
+          some(lm) {
+            let libname =
+                fs::connect(
+                    fs::dirname(out_filename),
+                    std::os::dylib_filename(
+                        #fmt("%s-%s-%s", lm.name, lm.extras_hash, lm.vers)));
+            run::run_program("cp", [out_filename, libname]);
+          }
+        }
+    }
+
     // Clean up on Darwin
     if sess.get_targ_cfg().os == session::os_macos {
         run::run_program("dsymutil", [out_filename]);
@@ -676,13 +691,6 @@ fn link_binary(sess: session::session,
     }
 }
 
-fn rename_library(out: str, lm: link_meta) {
-    let libname =
-        std::os::dylib_filename(#fmt("%s-%s-%s",
-                                     lm.name, lm.extras_hash, lm.vers));
-    let fullname = fs::connect(fs::dirname(out_filename), libname);
-    run::run_program("cp", [out, fullname]);
-}
 //
 // Local Variables:
 // mode: rust
