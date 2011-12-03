@@ -472,9 +472,11 @@ fn opts() -> [getopts::opt] {
          optflag("warn-unused-imports")];
 }
 
-fn build_output_filename(ifile: str, ofile: option::t<str>,
-                          sopts: @session::options) -> str {
+fn build_output_filenames(ifile: str, ofile: option::t<str>,
+                          sopts: @session::options)
+        -> @{out_filename: str, obj_filename:str} {
     let obj_filename = "";
+    let saved_out_filename: str = "";
     let stop_after_codegen =
         sopts.output_type != link::output_type_exe ||
             sopts.static && sopts.library;
@@ -501,13 +503,21 @@ fn build_output_filename(ifile: str, ofile: option::t<str>,
               }
             };
         obj_filename = base_filename + "." + suffix;
+
+        if sopts.library {
+            saved_out_filename = std::os::dylib_filename(base_filename);
+        } else {
+            saved_out_filename = base_filename;
+        }
       }
       some(out_file) {
+        // FIXME: what about windows? This will create a foo.exe.o.
+        saved_out_filename = out_file;
         obj_filename =
             if stop_after_codegen { out_file } else { out_file + ".o" };
       }
     }
-    ret obj_filename;
+    ret @{out_filename: saved_out_filename, obj_filename: obj_filename};
 }
 
 fn early_error(msg: str) -> ! {
@@ -541,7 +551,7 @@ fn main(args: [str]) {
     let sopts = build_session_options(match);
     let sess = build_session(sopts);
     let ofile = getopts::opt_maybe_str(match, "o");
-    let output = build_output_filename(ifile, ofile, sopts);
+    let outputs = build_output_filenames(ifile, ofile, sopts);
     let cfg = build_configuration(sess, binary, ifile);
     let pretty =
         option::map::<str,
@@ -562,14 +572,15 @@ fn main(args: [str]) {
         sopts.output_type != link::output_type_exe ||
             sopts.static && sopts.library;
 
-    let link_meta = compile_input(sess, cfg, ifile, output);
+    let temp_filename = outputs.obj_filename;
+
+    let link_meta = compile_input(sess, cfg, ifile, temp_filename);
 
     if stop_after_codegen { ret; }
 
-    let bin_name =
-        link::link_binary(sess, sopts.library, ofile, output);
+    link::link_binary(sess, temp_filename, outputs.out_filename);
     if sopts.library {
-        link::rename_library(bin_name, option::get(link_meta));
+        link::rename_library(outputs.out_filename, option::get(link_meta));
     }
 }
 
