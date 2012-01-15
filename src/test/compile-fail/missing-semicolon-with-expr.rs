@@ -1,6 +1,9 @@
 // error-pattern:statement with non-unit type requires a semicolon
+fn foo() {
+  task::spawn {|| }
+}
 
 fn main() {
-    let a = if true { true };
-    log(debug, a);
+  foo();
 }
+

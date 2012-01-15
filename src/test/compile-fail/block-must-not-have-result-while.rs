@@ -1,4 +1,4 @@
-// error-pattern:mismatched types: expected `()` but found `bool`
+// error-pattern:statement with non-unit type requires a semicolon
 
 fn main() {
     while true {

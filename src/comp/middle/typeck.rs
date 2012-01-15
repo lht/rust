@@ -896,13 +896,18 @@ mod demand {
           ures_err(err) {
             let e_err = resolve_type_vars_if_possible(fcx, expected);
             let a_err = resolve_type_vars_if_possible(fcx, actual);
-            fcx.ccx.tcx.sess.span_err(sp,
-                                      "mismatched types: expected `" +
+            if ty::type_is_nil(fcx.ccx.tcx, expected) {
+                fcx.ccx.tcx.sess.span_err(
+                    sp, "statement with non-unit type requires a semicolon");
+            } else {
+                fcx.ccx.tcx.sess.span_err(sp,
+                                          "mismatched types: expected `" +
                                           ty_to_str(fcx.ccx.tcx, e_err) +
                                           "` but found `" +
                                           ty_to_str(fcx.ccx.tcx, a_err) +
                                           "` (" + ty::type_err_to_str(err) +
                                           ")");
+            }
             ret mk_result(fcx, expected, ty_param_subst_var_ids);
           }
         }
