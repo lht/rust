@@ -121,7 +121,7 @@ Indicates whether a path represents a directory.
 */
 fn path_is_dir(p: path) -> bool {
     ret str::as_buf(p, {|buf|
-        rustrt::rust_path_is_dir(buf) != 0 as ctypes::c_int
+        rustrt::rust_path_is_dir(buf) != 0i32
     });
 }
 
