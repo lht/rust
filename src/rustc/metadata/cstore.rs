@@ -12,6 +12,7 @@ export crate_metadata;
 export mk_cstore;
 export get_crate_data;
 export set_crate_data;
+export get_crate_hash;
 export have_crate_data;
 export iter_crate_data;
 export add_used_crate_file;
@@ -79,6 +80,11 @@ fn get_crate_data(cstore: cstore, cnum: ast::crate_num) -> crate_metadata {
     ret p(cstore).metas.get(cnum);
 }
 
+fn get_crate_hash(cstore: cstore, cnum: ast::crate_num) -> str {
+    let cdata = get_crate_data(cstore, cnum);
+    ret decoder::get_crate_hash(cdata.data);
+}
+
 fn set_crate_data(cstore: cstore, cnum: ast::crate_num,
                   data: crate_metadata) {
     p(cstore).metas.insert(cnum, data);
@@ -136,6 +142,7 @@ fn find_use_stmt_cnum(cstore: cstore,
                       use_id: ast::node_id) -> option<ast::crate_num> {
     p(cstore).use_crate_map.find(use_id)
 }
+
 
 // returns hashes of crates directly used by this crate. Hashes are
 // sorted by crate name.
