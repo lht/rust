@@ -448,7 +448,6 @@ fn sanitize(s: str) -> str {
     let mut result = "";
     str::chars_iter(s) {|c|
         alt c {
-          '@' { result += "_sbox_"; }
           '~' { result += "_ubox_"; }
           '*' { result += "_ptr_"; }
           '&' { result += "_ref_"; }
@@ -485,7 +484,7 @@ fn mangle(ss: path) -> str {
 }
 
 fn exported_name(path: path, hash: str, vers: str) -> str {
-    ret mangle(path + [path_name(hash)] + [path_name(vers)]);
+    ret mangle(path + [path_name(hash)] + [path_name("@" + vers)]);
 }
 
 fn mangle_exported_name(ccx: @crate_ctxt, path: path, t: ty::t) -> str {
