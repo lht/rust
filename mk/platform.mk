@@ -319,6 +319,32 @@ CFG_RUN_arm-unknown-linux-gnueabi=
 CFG_RUN_TARG_arm-unknown-linux-gnueabi=
 RUSTC_FLAGS_arm-unknown-linux-gnueabi := --linker=$(CC_arm-unknown-linux-gnueabi)
 
+# arm-apple-darwin configuration
+CC_arm-apple-darwin=$(CC)
+CXX_arm-apple-darwin=$(CXX)
+CPP_arm-apple-darwin=$(CPP)
+AR_arm-apple-darwin=$(AR)
+CFG_LIB_NAME_arm-apple-darwin=lib$(1).dylib
+CFG_LIB_GLOB_arm-apple-darwin=lib$(1)-*.dylib
+CFG_LIB_DSYM_GLOB_arm-apple-darwin=lib$(1)-*.dylib.dSYM
+## FIXME configure sysroot during configuration
+CFG_GCCISH_CFLAGS_arm-apple-darwin := -Wall -Werror -g -fPIC -arch armv7 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk
+CFG_GCCISH_CXXFLAGS_arm-apple-darwin := -fno-rtti
+CFG_GCCISH_LINK_FLAGS_arm-apple-darwin := -lpthread -Wl,-no_compact_unwind -arch armv7 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk
+CFG_GCCISH_DEF_FLAG_arm-apple-darwin := -Wl,-exported_symbols_list,
+CFG_GCCISH_PRE_LIB_FLAGS_arm-apple-darwin :=
+CFG_GCCISH_POST_LIB_FLAGS_arm-apple-darwin :=
+CFG_DEF_SUFFIX_arm-apple-darwin := .darwin.def
+CFG_INSTALL_NAME_arm-apple-darwin = -Wl,-install_name,@rpath/$(1)
+CFG_LIBUV_LINK_FLAGS_arm-apple-darwin =
+CFG_EXE_SUFFIX_arm-apple-darwin :=
+CFG_WINDOWSY_arm-apple-darwin :=
+CFG_UNIXY_arm-apple-darwin := 1
+CFG_PATH_MUNGE_arm-apple-darwin := true
+CFG_LDPATH_arm-apple-darwin :=
+CFG_RUN_arm-apple-darwin=$(2)
+CFG_RUN_TARG_arm-apple-darwin=$(call CFG_RUN_i686-apple-darwin,,$(2))
+
 # mips-unknown-linux-gnu configuration
 CC_mips-unknown-linux-gnu=mips-linux-gnu-gcc
 CXX_mips-unknown-linux-gnu=mips-linux-gnu-g++

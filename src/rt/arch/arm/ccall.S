@@ -6,11 +6,13 @@
 .text
 .code 32
 .arm
-.align
+.align 2
 
 .globl __morestack
+#if !defined(__APPLE__)
 .hidden __morestack
 .type __morestack, %function
+#endif
 __morestack:
 	.fnstart
 	.save {r4, fp, lr}
