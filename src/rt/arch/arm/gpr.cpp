@@ -4,7 +4,7 @@
 
 #define LOAD(rn) do { \
     uintptr_t tmp; \
-    asm("mov %%" #rn ",%0" : "=r" (tmp) :); \
+    asm("mov " #rn ",%0" : "=r" (tmp) :); \
     this->rn = tmp; \
 } while (0)
 

@@ -1,7 +1,7 @@
 .text
 .code 32
 .arm
-.align
+.align 2
 
 
 .globl record_sp_limit

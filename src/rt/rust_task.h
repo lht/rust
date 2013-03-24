@@ -144,11 +144,16 @@
 #endif
 #endif
 #ifdef __APPLE__
+#include <TargetConditionals.h>
+#if TARGET_OS_IPHONE == 1
+#define RED_ZONE_SIZE RZ_MAC_32
+#elif TARGET_OS_MAC == 1
 #ifdef __i386__
 #define RED_ZONE_SIZE RZ_MAC_32
 #endif
 #ifdef __x86_64__
 #define RED_ZONE_SIZE RZ_MAC_64
+#endif
 #endif
 #endif
 #ifdef __WIN32__

@@ -12,7 +12,9 @@
 #include "rust_kernel.h"
 
 #ifdef __APPLE__
+#if !defined(__arm__)
 #include <crt_externs.h>
+#endif
 #endif
 
 #if defined(__WIN32__)
@@ -176,7 +178,9 @@ rust_run_program(const char* argv[],
 
     if (envp) {
 #ifdef __APPLE__
+# if !defined(__arm__)
         *_NSGetEnviron() = (char **)envp;
+# endif
 #else
         environ = (char **)envp;
 #endif
