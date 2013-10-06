@@ -22,11 +22,13 @@
 #include <time.h>
 
 #ifdef __APPLE__
-#include <TargetConditionals.h>
-#if !defined(__arm__)
-#include <crt_externs.h>
-#include <mach/mach_time.h>
-#endif
+# include <TargetConditionals.h>
+# include <mach/mach_time.h>
+# if TARGET_OS_IPHONE
+extern char **environ;
+# else
+#  include <crt_externs.h>
+# endif
 #endif
 
 #if !defined(__WIN32__)

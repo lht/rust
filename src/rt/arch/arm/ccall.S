@@ -3,6 +3,12 @@
 .section	.note.GNU-stack, "", %progbits
 #endif
 
+#ifdef __ARM_EABI__
+#define UNWIND
+#else
+#define UNWIND @
+#endif
+
 .text
 .code 32
 .arm
@@ -14,10 +20,10 @@
 .type __morestack, %function
 #endif
 __morestack:
-	.fnstart
-	.save {r4, fp, lr}
+	UNWIND .fnstart
+	UNWIND .save {r4, fp, lr}
 	push {r4, fp, lr}
-    .movsp r4
+        UNWIND .movsp r4
 	mov r4, sp
 	mov sp, r2
 	mov fp, sp
@@ -25,4 +31,4 @@ __morestack:
 	mov sp, r4
 	pop {r4, fp, lr}
 	mov pc, lr
-	.fnend
+	UNWIND .fnend
