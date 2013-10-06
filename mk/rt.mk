@@ -23,13 +23,19 @@
 # fit the experimental data (i.e., I was able to get the system
 # working under these assumptions).
 
+ifeq ($(1), arm-apple-darwin)
+IOS_CROSS_FLAGS = -arch armv7 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk
+else
+IOS_CROSS_FLAGS =
+endif
+
 # Hack for passing flags into LIBUV, see below.
 LIBUV_FLAGS_i386 = -m32 -fPIC -I$(S)src/etc/mingw-fix-include
 LIBUV_FLAGS_x86_64 = -m64 -fPIC
 ifeq ($(OSTYPE_$(1)), linux-androideabi)
 LIBUV_FLAGS_arm = -fPIC -DANDROID -std=gnu99
 else
-LIBUV_FLAGS_arm = -fPIC -std=gnu99
+LIBUV_FLAGS_arm = -fPIC -std=gnu99 -arch armv7 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk
 endif
 LIBUV_FLAGS_mips = -fPIC -mips32r2 -msoft-float -mabi=32
 
