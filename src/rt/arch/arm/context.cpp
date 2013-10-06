@@ -4,8 +4,8 @@
 #include "../../rust_globals.h"
 
 extern "C" void CDECL swap_registers(registers_t *oregs,
-                                     registers_t *regs)
-asm ("swap_registers");
+                                     registers_t *regs);
+//asm ("swap_registers");
 
 context::context()
 {

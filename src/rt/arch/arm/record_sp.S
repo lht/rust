@@ -3,17 +3,23 @@
 .section	.note.GNU-stack, "", %progbits
 #endif
 
+#if defined(__APPLE__)
+#define Glo(s) _##s
+#else
+#define Glo(s) s
+#endif
+
 .text
 .code 32
 .arm
 .align 2
 
 
-.globl record_sp_limit
-.globl get_sp_limit
-.globl get_sp
+.globl Glo(record_sp_limit)
+.globl Glo(get_sp_limit)
+.globl Glo(get_sp)
 
-record_sp_limit:
+Glo(record_sp_limit):
 	// First, try to read TLS address from coprocessor
 	mrc p15, #0, r3, c13, c0, #3
 	cmp r3, #0
@@ -30,7 +36,7 @@ record_sp_limit:
 	str r0, [r3]
 	mov pc, lr
 
-get_sp_limit:
+Glo(get_sp_limit):
 	// First, try to read TLS address from coprocessor
 	mrc p15, #0, r3, c13, c0, #3
 	cmp r3, #0
@@ -47,6 +53,6 @@ get_sp_limit:
 	ldr r0, [r3]
 	mov pc, lr
 
-get_sp:
+Glo(get_sp):
 	mov r0, sp
 	mov pc, lr

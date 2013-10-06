@@ -3,14 +3,19 @@
 .section	.note.GNU-stack, "", %progbits
 #endif
 
+#if defined(__APPLE__)
+#define Glo(s) _##s
+#else
+#define Glo(s) s
+#endif
+
 .text
 .code 32
 .arm
 .align 2
 
-
-.globl swap_registers
-swap_registers:
+.globl Glo(swap_registers)
+Glo(swap_registers):
 	str r0, [r0, #0]
 	str r3, [r0, #12]
 	str r4, [r0, #16]
