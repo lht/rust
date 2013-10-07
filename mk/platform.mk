@@ -330,7 +330,7 @@ CFG_LIB_DSYM_GLOB_arm-apple-darwin=lib$(1)-*.dylib.dSYM
 ## FIXME configure sysroot during configuration
 CFG_GCCISH_CFLAGS_arm-apple-darwin := -Wall -Werror -g -fPIC -arch armv7 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk
 CFG_GCCISH_CXXFLAGS_arm-apple-darwin := -fno-rtti
-CFG_GCCISH_LINK_FLAGS_arm-apple-darwin := -lpthread -Wl,-no_compact_unwind -arch armv7 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk
+CFG_GCCISH_LINK_FLAGS_arm-apple-darwin := -dynamiclib -lpthread -Wl,-no_compact_unwind -arch armv7 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk
 CFG_GCCISH_DEF_FLAG_arm-apple-darwin := -Wl,-exported_symbols_list,
 CFG_GCCISH_PRE_LIB_FLAGS_arm-apple-darwin :=
 CFG_GCCISH_POST_LIB_FLAGS_arm-apple-darwin :=
