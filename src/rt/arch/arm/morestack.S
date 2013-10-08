@@ -3,30 +3,41 @@
 .section	.note.GNU-stack, "", %progbits
 #endif
 
+#ifdef __ARM_EABI__
+#define UNWIND
+#else
+#define UNWIND @
+#endif
+
 .text
 .code 32
 .arm
-.align
+.align 2
 
 .global upcall_new_stack
 .global upcall_del_stack
 .global __morestack
+
+#if !defined(__APPLE__)
 .hidden __morestack
+#endif
 
 // r4 and r5 are scratch registers for __morestack due to llvm
 // ARMFrameLowering::adjustForSegmentedStacks() implementation.
+#if !defined(__APPLE__)
  .type __morestack,%function
+#endif
 __morestack:
-	.fnstart
+	UNWIND .fnstart
 	// Save frame pointer and return address
-	.save {r4, r5}
-	.save {lr}
-	.save {r6, fp, lr}
+	UNWIND .save {r4, r5}
+	UNWIND .save {lr}
+	UNWIND .save {r6, fp, lr}
     push {r6, fp, lr}
 
-	.movsp r6
+	UNWIND .movsp r6
 	mov r6, sp
-	.setfp fp, sp, #4
+	UNWIND .setfp fp, sp, #4
 	add fp, sp, #4
 
     // Save argument registers of the original function
@@ -68,4 +79,4 @@ __morestack:
     // Return
     pop {r6, fp, lr}
     mov pc, lr
-    .fnend
+    UNWIND .fnend

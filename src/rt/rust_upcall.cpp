@@ -59,8 +59,10 @@ upcall_call_shim_on_rust_stack(void *args, void *fn_ptr) {
 #else
 #  if defined(__APPLE__) && defined(__arm__)
 #    define PERSONALITY_FUNC __gxx_personality_sj0
-#  elif defined(__USING_SJLJ_EXCEPTIONS__) && !defined(__arm__)
+#  elif defined(__USING_SJLJ_EXCEPTIONS__)
 #    define PERSONALITY_FUNC __gxx_personality_sjlj
+#  else
+#    define PERSONALITY_FUNC __gxx_personality_v0
 #  endif
 #endif
 

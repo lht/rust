@@ -965,6 +965,7 @@ pub mod types {
         }
 
         #[cfg(target_arch = "x86")]
+        #[cfg(target_arch = "arm")]
         pub mod arch {
             pub mod c95 {
                 pub type c_char = i8;
