@@ -184,18 +184,22 @@ LIBUV_NO_LOAD = run-benchmarks.target.mk run-tests.target.mk \
 
 export PYTHONPATH := $(PYTHONPATH):$$(S)src/gyp/pylib
 
+ifeq ($(OSTYPE_$(1)), apple-ios)
 $$(LIBUV_MAKEFILE_$(1)_$(2)): $$(LIBUV_DEPS)
-	(cd $(S)src/libuv/ && ./autogen.sh)
-	cd $$(RT_BUILD_DIR_$(1)_$(2))/libuv; $(S)src/libuv/configure --build=$(CFG_BUILD_TRIPLE) --host=$(1) \
+	#(cd $(S)src/libuv/ && ./autogen.sh)
+	cd $$(RT_BUILD_DIR_$(1)_$(2))/libuv; $(S)src/libuv/configure \
+	--build=$(CFG_BUILD_TRIPLE) --host=armv7-apple-darwin \
 	CC="$$(CC_$(1))" \
 	CXX="$$(CXX_$(1))" \
 	AR="$$(AR_$(1))"
+else
+$$(LIBUV_MAKEFILE_$(1)_$(2)): $$(LIBUV_DEPS)
+	(cd $(S)src/libuv/ && \
+	 $$(CFG_PYTHON) ./gyp_uv -f make -Dtarget_arch=$$(LIBUV_ARCH_$(1)) -D ninja \
+	   -DOS=$$(LIBUV_OSTYPE_$(1)_$(2)) \
+	   -Goutput_dir=$$(@D) --generator-output $$(@D))
+endif
 
-# $$(LIBUV_MAKEFILE_$(1)_$(2)): $$(LIBUV_DEPS)
-# 	(cd $(S)src/libuv/ && \
-# 	 $$(CFG_PYTHON) ./gyp_uv -f make -Dtarget_arch=$$(LIBUV_ARCH_$(1)) -D ninja \
-# 	   -DOS=$$(LIBUV_OSTYPE_$(1)_$(2)) \
-# 	   -Goutput_dir=$$(@D) --generator-output $$(@D))
 
 # XXX: Shouldn't need platform-specific conditions here
 ifdef CFG_WINDOWSY_$(1)
@@ -221,7 +225,7 @@ $$(LIBUV_LIB_$(1)_$(2)): $$(LIBUV_DEPS) $$(LIBUV_MAKEFILE_$(1)_$(2))
 		NO_LOAD="$$(LIBUV_NO_LOAD)" \
 		V=$$(VERBOSE)
 	$$(Q)cp $$(@D)/.libs/libuv.a $$@
-else ifeq ($(1), arm-apple-darwin)
+else ifeq ($(OSTYPE_$(1)), apple-ios)
 $$(LIBUV_LIB_$(1)_$(2)): $$(LIBUV_DEPS) $$(LIBUV_MAKEFILE_$(1)_$(2))
 	$$(Q)$$(MAKE) -C $$(@D) \
 		CFLAGS="-arch armv7 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk $$(CFG_GCCISH_CFLAGS) $$(LIBUV_FLAGS_$$(HOST_$(1))) $$(SNAP_DEFINES)" \
@@ -259,10 +263,10 @@ $$(JEMALLOC_LIB_$(1)_$(2)):
 		CXX="$$(CXX_$(1))" \
 		AR="$$(AR_$(1))"
 	$$(Q)$$(MAKE) -C $$(RT_BUILD_DIR_$(1)_$(2))/jemalloc
-else ifeq ($(1), arm-apple-darwin)
+else ifeq ($(OSTYPE_$(1)), apple-ios)
 $$(JEMALLOC_LIB_$(1)_$(2)):
 	cd $$(RT_BUILD_DIR_$(1)_$(2))/jemalloc; $(S)src/rt/jemalloc/configure \
-		--disable-experimental --build=$(CFG_BUILD_TRIPLE) --host=$(1) \
+		--disable-experimental --build=$(CFG_BUILD_TRIPLE) --host=armv7-apple-darwin \
 		EXTRA_CFLAGS="-arch armv7 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk $$(CFG_GCCISH_CFLAGS) $$(LIBUV_FLAGS_$$(HOST_$(1))) $$(SNAP_DEFINES)" \
 		LDFLAGS="$$(CFG_GCCISH_LINK_FLAGS) $$(LIBUV_FLAGS_$$(HOST_$(1)))" \
 		CC="$$(CC_$(1))" \
@@ -298,6 +302,10 @@ $(1)/%.linux.def:    %.def.in $$(MKFILE_DEPS)
 	$$(Q)echo "};" >> $$@
 
 $(1)/%.darwin.def:	%.def.in $$(MKFILE_DEPS)
+	@$$(call E, def: $$@)
+	$$(Q)sed 's/^./_&/' $$< > $$@
+
+$(1)/%.ios.def:	%.def.in $$(MKFILE_DEPS)
 	@$$(call E, def: $$@)
 	$$(Q)sed 's/^./_&/' $$< > $$@
 

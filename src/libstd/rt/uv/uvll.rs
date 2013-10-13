@@ -240,6 +240,7 @@ pub struct addrinfo {
 }
 
 #[cfg(target_os = "macos")]
+#[cfg(target_os = "ios")]
 #[cfg(target_os = "freebsd")]
 pub struct addrinfo {
     ai_flags: c_int,

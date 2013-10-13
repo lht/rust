@@ -941,6 +941,7 @@ pub mod types {
     }
 
     #[cfg(target_os = "macos")]
+    #[cfg(target_os = "ios")]
     pub mod os {
         pub mod common {
             pub mod posix01 {
@@ -2305,6 +2306,7 @@ pub mod consts {
     }
 
     #[cfg(target_os = "macos")]
+    #[cfg(target_os = "ios")]
     pub mod os {
         pub mod c95 {
             use libc::types::os::arch::c95::{c_int, c_uint};
@@ -2955,6 +2957,7 @@ pub mod funcs {
     #[cfg(target_os = "linux")]
     #[cfg(target_os = "android")]
     #[cfg(target_os = "macos")]
+    #[cfg(target_os = "ios")]
     #[cfg(target_os = "freebsd")]
     pub mod posix88 {
         pub mod stat_ {
@@ -2974,6 +2977,7 @@ pub mod funcs {
                 pub fn fstat(fildes: c_int, buf: *mut stat) -> c_int;
 
                 #[cfg(target_os = "macos")]
+                #[cfg(target_os = "ios")]
                 #[link_name = "fstat64"]
                 pub fn fstat(fildes: c_int, buf: *mut stat) -> c_int;
 
@@ -2986,6 +2990,7 @@ pub mod funcs {
                 pub fn stat(path: *c_char, buf: *mut stat) -> c_int;
 
                 #[cfg(target_os = "macos")]
+                #[cfg(target_os = "ios")]
                 #[link_name = "stat64"]
                 pub fn stat(path: *c_char, buf: *mut stat) -> c_int;
             }
@@ -3163,6 +3168,7 @@ pub mod funcs {
     #[cfg(target_os = "linux")]
     #[cfg(target_os = "android")]
     #[cfg(target_os = "macos")]
+    #[cfg(target_os = "ios")]
     #[cfg(target_os = "freebsd")]
     pub mod posix01 {
         #[nolink]
@@ -3178,6 +3184,7 @@ pub mod funcs {
                 pub fn lstat(path: *c_char, buf: *mut stat) -> c_int;
 
                 #[cfg(target_os = "macos")]
+                #[cfg(target_os = "ios")]
                 #[link_name = "lstat64"]
                 pub fn lstat(path: *c_char, buf: *mut stat) -> c_int;
             }
@@ -3273,6 +3280,7 @@ pub mod funcs {
     #[cfg(target_os = "linux")]
     #[cfg(target_os = "android")]
     #[cfg(target_os = "macos")]
+    #[cfg(target_os = "ios")]
     #[cfg(target_os = "freebsd")]
     pub mod posix08 {
         pub mod unistd {
@@ -3281,6 +3289,7 @@ pub mod funcs {
 
 
     #[cfg(target_os = "macos")]
+    #[cfg(target_os = "ios")]
     #[cfg(target_os = "freebsd")]
     pub mod bsd44 {
         use libc::types::common::c95::{c_void};
@@ -3337,6 +3346,7 @@ pub mod funcs {
     }
 
     #[cfg(target_os = "macos")]
+    #[cfg(target_os = "ios")]
     #[nolink]
     pub mod extra {
         use libc::types::os::arch::c95::{c_char, c_int};

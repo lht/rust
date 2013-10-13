@@ -32,7 +32,7 @@ use std::int;
 use std::hashmap::HashMap;
 
 #[deriving(Eq)]
-pub enum Os { OsWin32, OsMacos, OsLinux, OsAndroid, OsFreebsd, }
+pub enum Os { OsWin32, OsMacos, OsIos, OsLinux, OsAndroid, OsFreebsd, }
 
 #[deriving(Clone)]
 pub enum crate_type {
@@ -420,6 +420,7 @@ pub fn sess_os_to_meta_os(os: Os) -> metadata::loader::Os {
 
     match os {
         OsWin32 => loader::OsWin32,
+        OsIos => loader::OsIos,
         OsLinux => loader::OsLinux,
         OsAndroid => loader::OsAndroid,
         OsMacos => loader::OsMacos,

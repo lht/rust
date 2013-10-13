@@ -408,6 +408,7 @@ mod stat {
 }
 
 #[cfg(target_os = "macos")]
+#[cfg(target_os = "ios")]
 mod stat {
     pub mod arch {
         use libc;
@@ -545,6 +546,7 @@ impl PosixPath {
 #[cfg(target_os = "freebsd")]
 #[cfg(target_os = "linux")]
 #[cfg(target_os = "macos")]
+#[cfg(target_os = "ios")]
 impl PosixPath {
     pub fn get_atime(&self) -> Option<(i64, int)> {
         match self.stat() {
@@ -593,6 +595,7 @@ impl PosixPath {
 
 #[cfg(target_os = "freebsd")]
 #[cfg(target_os = "macos")]
+#[cfg(target_os = "ios")]
 impl PosixPath {
     pub fn get_birthtime(&self) -> Option<(i64, int)> {
         match self.stat() {

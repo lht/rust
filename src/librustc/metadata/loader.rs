@@ -28,7 +28,7 @@ use std::cast;
 use std::io;
 use std::num;
 use std::option;
-use std::os::consts::{macos, freebsd, linux, android, win32};
+use std::os::consts::{macos, freebsd, ios, linux, android, win32};
 use std::ptr;
 use std::str;
 use std::vec;
@@ -37,6 +37,7 @@ use extra::flate;
 pub enum Os {
     OsMacos,
     OsWin32,
+    OsIos,
     OsLinux,
     OsAndroid,
     OsFreebsd
@@ -75,6 +76,7 @@ fn libname(cx: &Context) -> (~str, ~str) {
     let (dll_prefix, dll_suffix) = match cx.os {
         OsWin32 => (win32::DLL_PREFIX, win32::DLL_SUFFIX),
         OsMacos => (macos::DLL_PREFIX, macos::DLL_SUFFIX),
+        OsIos => (ios::DLL_PREFIX, ios::DLL_SUFFIX),
         OsLinux => (linux::DLL_PREFIX, linux::DLL_SUFFIX),
         OsAndroid => (android::DLL_PREFIX, android::DLL_SUFFIX),
         OsFreebsd => (freebsd::DLL_PREFIX, freebsd::DLL_SUFFIX),
@@ -248,6 +250,7 @@ fn get_metadata_section(os: Os,
 pub fn meta_section_name(os: Os) -> &'static str {
     match os {
         OsMacos => "__DATA,__note.rustc",
+        OsIos=> "__DATA,__note.rustc",
         OsWin32 => ".note.rustc",
         OsLinux => ".note.rustc",
         OsAndroid => ".note.rustc",
@@ -258,6 +261,7 @@ pub fn meta_section_name(os: Os) -> &'static str {
 pub fn read_meta_section_name(os: Os) -> &'static str {
     match os {
         OsMacos => "__note.rustc",
+        OsIos => "__note.rustc",
         OsWin32 => ".note.rustc",
         OsLinux => ".note.rustc",
         OsAndroid => ".note.rustc",

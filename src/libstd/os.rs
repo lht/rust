@@ -365,6 +365,7 @@ pub fn fsync_fd(fd: c_int, level: io::fsync::Level) -> c_int {
 }
 
 #[cfg(target_os = "macos")]
+#[cfg(target_os = "ios")]
 pub fn fsync_fd(fd: c_int, level: io::fsync::Level) -> c_int {
     #[fixed_stack_segment]; #[inline(never)];
 
@@ -492,6 +493,7 @@ pub fn self_exe_path() -> Option<Path> {
     }
 
     #[cfg(target_os = "macos")]
+    #[cfg(target_os = "ios")]
     fn load_self() -> Option<~str> {
         #[fixed_stack_segment]; #[inline(never)];
         unsafe {
@@ -714,6 +716,7 @@ pub fn list_dir(p: &Path) -> ~[~str] {
         #[cfg(target_os = "android")]
         #[cfg(target_os = "freebsd")]
         #[cfg(target_os = "macos")]
+        #[cfg(target_os = "ios")]
         unsafe fn get_list(p: &Path) -> ~[~str] {
             #[fixed_stack_segment]; #[inline(never)];
             use libc::{dirent_t};
@@ -1003,6 +1006,7 @@ pub fn rename_file(old: &Path, new: &Path) -> bool {
 /// Returns the platform-specific value of errno
 pub fn errno() -> int {
     #[cfg(target_os = "macos")]
+    #[cfg(target_os = "ios")]
     #[cfg(target_os = "freebsd")]
     fn errno_location() -> *c_int {
         #[fixed_stack_segment]; #[inline(never)];
@@ -1062,6 +1066,7 @@ pub fn last_os_error() -> ~str {
     #[cfg(unix)]
     fn strerror() -> ~str {
         #[cfg(target_os = "macos")]
+        #[cfg(target_os = "ios")]
         #[cfg(target_os = "android")]
         #[cfg(target_os = "freebsd")]
         fn strerror_r(errnum: c_int, buf: *mut c_char, buflen: size_t)
@@ -1204,6 +1209,7 @@ unsafe fn load_argc_and_argv(argc: c_int, argv: **c_char) -> ~[~str] {
  * Returns a list of the command line arguments.
  */
 #[cfg(target_os = "macos")]
+#[cfg(target_os = "ios")]
 fn real_args() -> ~[~str] {
     #[fixed_stack_segment]; #[inline(never)];
 
@@ -1297,6 +1303,7 @@ pub fn args() -> ~[~str] {
 }
 
 #[cfg(target_os = "macos")]
+#[cfg(target_os = "ios")]
 extern {
     // These functions are in crt_externs.h.
     pub fn _NSGetArgc() -> *c_int;
@@ -1625,6 +1632,9 @@ pub mod consts {
     #[cfg(target_os = "macos")]
     pub use os::consts::macos::*;
 
+    #[cfg(target_os = "ios")]
+    pub use os::consts::ios::*;
+
     #[cfg(target_os = "freebsd")]
     pub use os::consts::freebsd::*;
 
@@ -1659,6 +1669,13 @@ pub mod consts {
 
     pub mod macos {
         pub static SYSNAME: &'static str = "macos";
+        pub static DLL_PREFIX: &'static str = "lib";
+        pub static DLL_SUFFIX: &'static str = ".dylib";
+        pub static EXE_SUFFIX: &'static str = "";
+    }
+
+    pub mod ios {
+        pub static SYSNAME: &'static str = "ios";
         pub static DLL_PREFIX: &'static str = "lib";
         pub static DLL_SUFFIX: &'static str = ".dylib";
         pub static EXE_SUFFIX: &'static str = "";

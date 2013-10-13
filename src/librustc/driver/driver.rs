@@ -68,6 +68,7 @@ pub fn default_configuration(sess: Session) ->
     let tos = match sess.targ_cfg.os {
         session::OsWin32 =>   @"win32",
         session::OsMacos =>   @"macos",
+        session::OsIos =>     @"ios",
         session::OsLinux =>   @"linux",
         session::OsAndroid => @"android",
         session::OsFreebsd => @"freebsd"
@@ -567,6 +568,7 @@ static os_names : &'static [(&'static str, session::Os)] = &'static [
     ("mingw32", session::OsWin32),
     ("win32",   session::OsWin32),
     ("darwin",  session::OsMacos),
+    ("ios",     session::OsIos),
     ("android", session::OsAndroid),
     ("linux",   session::OsLinux),
     ("freebsd", session::OsFreebsd)];
@@ -587,6 +589,7 @@ static architecture_abis : &'static [(&'static str, abi::Architecture)] = &'stat
     ("x86_64", abi::X86_64),
 
     ("arm",    abi::Arm),
+    ("armv7",  abi::Arm),
     ("xscale", abi::Arm),
 
     ("mips",   abi::Mips)];

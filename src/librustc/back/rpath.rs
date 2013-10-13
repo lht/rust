@@ -115,7 +115,7 @@ pub fn get_rpath_relative_to_output(os: session::Os,
     let prefix = match os {
         session::OsAndroid | session::OsLinux | session::OsFreebsd
                           => "$ORIGIN",
-        session::OsMacos => "@executable_path",
+        session::OsMacos | session::OsIos => "@executable_path",
         session::OsWin32 => unreachable!()
     };
 

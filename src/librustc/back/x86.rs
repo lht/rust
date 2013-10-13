@@ -28,6 +28,8 @@ pub fn get_target_strs(target_triple: ~str, target_os: session::Os) -> target_st
                 "-v128:128:128-a0:0:64-f80:128:128" + "-n8:16:32"
           }
 
+          session::OsIos => { ~"" }
+
           session::OsWin32 => {
             ~"e-p:32:32-f64:64:64-i64:64:64-f80:32:32-n8:16:32"
           }

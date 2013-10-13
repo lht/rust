@@ -319,31 +319,31 @@ CFG_RUN_arm-unknown-linux-gnueabi=
 CFG_RUN_TARG_arm-unknown-linux-gnueabi=
 RUSTC_FLAGS_arm-unknown-linux-gnueabi := --linker=$(CC_arm-unknown-linux-gnueabi)
 
-# arm-apple-darwin configuration
-CC_arm-apple-darwin=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang
-CXX_arm-apple-darwin=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
-CPP_arm-apple-darwin=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cpp
-AR_arm-apple-darwin=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar
-CFG_LIB_NAME_arm-apple-darwin=lib$(1).dylib
-CFG_LIB_GLOB_arm-apple-darwin=lib$(1)-*.dylib
-CFG_LIB_DSYM_GLOB_arm-apple-darwin=lib$(1)-*.dylib.dSYM
+# armv7-apple-ios configuration
+CC_armv7-apple-ios=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang
+CXX_armv7-apple-ios=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
+CPP_armv7-apple-ios=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cpp
+AR_armv7-apple-ios=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar
+CFG_LIB_NAME_armv7-apple-ios=lib$(1).dylib
+CFG_LIB_GLOB_armv7-apple-ios=lib$(1)-*.dylib
+CFG_LIB_DSYM_GLOB_armv7-apple-ios=lib$(1)-*.dylib.dSYM
 ## FIXME configure sysroot during configuration
-CFG_GCCISH_CFLAGS_arm-apple-darwin := -Wall -Werror -g -fPIC -arch armv7 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk
-CFG_GCCISH_CXXFLAGS_arm-apple-darwin := -fno-rtti
-CFG_GCCISH_LINK_FLAGS_arm-apple-darwin := -dynamiclib -lpthread -Wl,-no_compact_unwind -arch armv7 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk
-CFG_GCCISH_DEF_FLAG_arm-apple-darwin := -Wl,-exported_symbols_list,
-CFG_GCCISH_PRE_LIB_FLAGS_arm-apple-darwin :=
-CFG_GCCISH_POST_LIB_FLAGS_arm-apple-darwin :=
-CFG_DEF_SUFFIX_arm-apple-darwin := .darwin.def
-CFG_INSTALL_NAME_arm-apple-darwin = -Wl,-install_name,@rpath/$(1)
-CFG_LIBUV_LINK_FLAGS_arm-apple-darwin =
-CFG_EXE_SUFFIX_arm-apple-darwin :=
-CFG_WINDOWSY_arm-apple-darwin :=
-CFG_UNIXY_arm-apple-darwin := 1
-CFG_PATH_MUNGE_arm-apple-darwin := true
-CFG_LDPATH_arm-apple-darwin :=
-CFG_RUN_arm-apple-darwin=$(2)
-CFG_RUN_TARG_arm-apple-darwin=$(call CFG_RUN_i686-apple-darwin,,$(2))
+CFG_GCCISH_CFLAGS_armv7-apple-ios := -Wall -Werror -g -fPIC -arch armv7 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk
+CFG_GCCISH_CXXFLAGS_armv7-apple-ios := -fno-rtti
+CFG_GCCISH_LINK_FLAGS_armv7-apple-ios := -dynamiclib -lpthread -Wl,-no_compact_unwind -arch armv7 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk
+CFG_GCCISH_DEF_FLAG_armv7-apple-ios := -Wl,-exported_symbols_list,
+CFG_GCCISH_PRE_LIB_FLAGS_armv7-apple-ios :=
+CFG_GCCISH_POST_LIB_FLAGS_armv7-apple-ios :=
+CFG_DEF_SUFFIX_armv7-apple-ios := .ios.def
+CFG_INSTALL_NAME_armv7-apple-ios = -Wl,-install_name,@rpath/$(1)
+CFG_LIBUV_LINK_FLAGS_armv7-apple-ios =
+CFG_EXE_SUFFIX_armv7-apple-ios :=
+CFG_WINDOWSY_armv7-apple-ios :=
+CFG_UNIXY_armv7-apple-ios := 1
+CFG_PATH_MUNGE_armv7-apple-ios := true
+CFG_LDPATH_armv7-apple-ios :=
+CFG_RUN_armv7-apple-ios=$(2)
+CFG_RUN_TARG_armv7-apple-ios=$(call CFG_RUN_armv7-apple-ios,,$(2))
 
 # mips-unknown-linux-gnu configuration
 CC_mips-unknown-linux-gnu=mips-linux-gnu-gcc
@@ -507,7 +507,12 @@ define CFG_MAKE_TOOLCHAIN
         $$(CFG_GCCISH_DEF_FLAG_$(1))$$(3) $$(2)        \
         $$(call CFG_INSTALL_NAME_$(1),$$(4))
 
-  ifeq ($$(findstring $(HOST_$(1)),arm mips),)
+
+  ifeq ($(HOST_$(1)),armv7)
+
+  CFG_ASSEMBLE_$(1)=$$(CC_$(1)) -x assembler-with-cpp -arch armv7 $$(CFG_DEPEND_FLAGS) $$(2) -c -o $$(1)
+
+  else ifeq ($$(findstring $(HOST_$(1)),arm mips),)
 
   # We're using llvm-mc as our assembler because it supports
   # .cfi pseudo-ops on mac
@@ -521,7 +526,7 @@ define CFG_MAKE_TOOLCHAIN
 
   # For the ARM and MIPS crosses, use the toolchain assembler
   # XXX: We should be able to use the LLVM assembler
-  CFG_ASSEMBLE_$(1)=$$(CC_$(1)) -x assembler-with-cpp -arch armv7 $$(CFG_DEPEND_FLAGS) $$(2) -c -o $$(1)
+  CFG_ASSEMBLE_$(1)=$$(CC_$(1)) $$(CFG_DEPEND_FLAGS) $$(2) -c -o $$(1)
 
   endif
 

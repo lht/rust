@@ -27,7 +27,7 @@ use std::char;
 use std::hash::Streaming;
 use std::hash;
 use std::io;
-use std::os::consts::{macos, freebsd, linux, android, win32};
+use std::os::consts::{macos, ios, freebsd, linux, android, win32};
 use std::os;
 use std::ptr;
 use std::rt::io::Writer;
@@ -870,6 +870,7 @@ pub fn output_dll_filename(os: session::Os, lm: LinkMeta) -> ~str {
     let (dll_prefix, dll_suffix) = match os {
         session::OsWin32 => (win32::DLL_PREFIX, win32::DLL_SUFFIX),
         session::OsMacos => (macos::DLL_PREFIX, macos::DLL_SUFFIX),
+        session::OsIos => (ios::DLL_PREFIX, ios::DLL_SUFFIX),
         session::OsLinux => (linux::DLL_PREFIX, linux::DLL_SUFFIX),
         session::OsAndroid => (android::DLL_PREFIX, android::DLL_SUFFIX),
         session::OsFreebsd => (freebsd::DLL_PREFIX, freebsd::DLL_SUFFIX),
