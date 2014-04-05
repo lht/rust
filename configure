@@ -396,6 +396,7 @@ valopt local-rust-root "/usr/local" "set prefix for local rust binary"
 valopt llvm-root "" "set LLVM root"
 valopt android-cross-path "/opt/ndk_standalone" "Android NDK standalone path"
 valopt mingw32-cross-path "" "MinGW32 cross compiler path"
+valopt ios-arch "" "Targeting iOS device arch (armv7, armv7s, etc)"
 
 valopt build "${DEFAULT_BUILD}" "GNUs ./configure syntax LLVM build triple"
 valopt host "${CFG_BUILD}" "GNUs ./configure syntax LLVM host triples"
@@ -1051,6 +1052,7 @@ putvar CFG_LIBDIR_RELATIVE
 putvar CFG_DISABLE_MANAGE_SUBMODULES
 putvar CFG_ANDROID_CROSS_PATH
 putvar CFG_MINGW32_CROSS_PATH
+putvar CFG_IOS_ARCH
 putvar CFG_MANDIR
 putvar CFG_DISABLE_INJECT_STD_VERSION
 

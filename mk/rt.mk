@@ -154,7 +154,11 @@ define DEF_THIRD_PARTY_TARGETS
 ifeq ($$(CFG_WINDOWSY_$(1)), 1)
   LIBUV_OSTYPE_$(1) := win
 else ifeq ($(OSTYPE_$(1)), apple-darwin)
-  LIBUV_OSTYPE_$(1) := mac
+  ifeq ($(LIBUV_ARCH_$(1)), arm)
+    LIBUV_OSTYPE_$(1) := ios
+  else
+    LIBUV_OSTYPE_$(1) := mac
+  endif
 else ifeq ($(OSTYPE_$(1)), unknown-freebsd)
   LIBUV_OSTYPE_$(1) := freebsd
 else ifeq ($(OSTYPE_$(1)), linux-androideabi)
@@ -185,6 +189,7 @@ $$(LIBUV_MAKEFILE_$(1)): $$(LIBUV_DEPS) $$(MKFILE_DEPS) $$(LIBUV_STAMP_$(1))
 	 $$(CFG_PYTHON) ./gyp_uv.py -f make -Dtarget_arch=$$(LIBUV_ARCH_$(1)) \
 	   -D ninja \
 	   -DOS=$$(LIBUV_OSTYPE_$(1)) \
+	   -DIOS_ARCH=$(CFG_IOS_ARCH) \
 	   -Goutput_dir=$$(@D) --generator-output $$(@D))
 	touch $$@
 

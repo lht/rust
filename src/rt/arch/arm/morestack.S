@@ -5,29 +5,48 @@
 
 /* See i386/morestack.S for the lengthy, general explanation. */
 
+
+#if defined(__APPLE__)
+#define MORESTACK               ___morestack
+#else
+#define MORESTACK               __morestack
+#endif
+
+#ifdef __ARM_EABI__
+#define UNWIND
+#else
+#define UNWIND @
+#endif
+
 .text
 .code 32
 .arm
+#if defined(__APPLE__)
+.align 2
+#else
 .align
+#endif
 
 .global rust_stack_exhausted
-.global __morestack
-.hidden __morestack
+.global MORESTACK
 
 // r4 and r5 are scratch registers for __morestack due to llvm
 // ARMFrameLowering::adjustForSegmentedStacks() implementation.
- .type __morestack,%function
-__morestack:
-	.fnstart
+#if !defined(__APPLE__)
+.hidden MORESTACK
+.type MORESTACK,%function
+#endif
+MORESTACK:
+	UNWIND .fnstart
 	// Save frame pointer and return address
-	.save {r4, r5}
-	.save {lr}
-	.save {r6, fp, lr}
-    push {r6, fp, lr}
+	UNWIND .save {r4, r5}
+	UNWIND .save {lr}
+	UNWIND .save {r6, fp, lr}
+	push {r6, fp, lr}
 
-	.movsp r6
+	UNWIND .movsp r6
 	mov r6, sp
-	.setfp fp, sp, #4
+	UNWIND .setfp fp, sp, #4
 	add fp, sp, #4
 
     // Save argument registers of the original function
@@ -37,4 +56,4 @@ __morestack:
     bl rust_stack_exhausted@plt
 
     // the above function ensures that it never returns
-    .fnend
+    UNWIND .fnend
