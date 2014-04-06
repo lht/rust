@@ -22,7 +22,7 @@
 .code 32
 .arm
 #if defined(__APPLE__)
-.align 2
+.align 4
 #else
 .align
 #endif
