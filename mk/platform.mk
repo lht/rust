@@ -193,12 +193,13 @@ CFG_RUN_TARG_i686-unknown-linux-gnu=$(call CFG_RUN_i686-unknown-linux-gnu,,$(2))
 # arm-apple-darwin configuration
 ifeq ($(CFG_OSTYPE),apple-darwin)
 CFG_IOS_SDK = $(shell xcrun --show-sdk-path -sdk iphoneos 2>/dev/null)
-CFG_IOS_FLAGS = -target arm-apple-darwin -isysroot $(CFG_IOS_SDK) -I$(CFG_IOS_SDK)/usr/include -I$(CFG_IOS_SDK)/usr/include/c++/4.2.1
+CFG_IOS_FLAGS = -target arm-apple-darwin -arch $(CFG_IOS_ARCH) -isysroot $(CFG_IOS_SDK) -I$(CFG_IOS_SDK)/usr/include -I$(CFG_IOS_SDK)/usr/include/c++/4.2.1
 CC_arm-apple-darwin = $(shell xcrun -find -sdk iphoneos clang)
 CXX_arm-apple-darwin = $(shell xcrun -find -sdk iphoneos clang++)
 CPP_arm-apple-darwin = $(shell xcrun -find -sdk iphoneos clang++)
 AR_arm-apple-darwin = $(shell xcrun -find -sdk iphoneos ar)
 CFG_LIB_NAME_arm-apple-darwin = lib$(1).dylib
+CFG_STATIC_LIB_NAME_arm-apple-darwin=lib$(1).a
 CFG_LIB_GLOB_arm-apple-darwin = lib$(1)-*.dylib
 CFG_LIB_DSYM_GLOB_arm-apple-darwin = lib$(1)-*.dylib.dSYM
 CFG_GCCISH_CFLAGS_arm-apple-darwin := -Wall -Werror -g -fPIC $(CFG_IOS_FLAGS)
